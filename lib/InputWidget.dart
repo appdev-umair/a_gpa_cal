@@ -11,6 +11,11 @@ class InputWidget extends StatefulWidget {
   State<InputWidget> createState() => InputWidgetState();
 }
 
+List<TextEditingController> pointsController = [
+  TextEditingController(text: "")
+];
+List<double> creditHoursList = [];
+
 class InputWidgetState extends State<InputWidget> {
   Color myColor = Colors.grey;
   List<String> _gradeList = [
@@ -34,6 +39,7 @@ class InputWidgetState extends State<InputWidget> {
     '5',
     '6',
   ];
+  double qPoint = 0;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -65,6 +71,36 @@ class InputWidgetState extends State<InputWidget> {
                   onChanged: (newValue) {
                     setState(() {
                       String _selectedOption = newValue!;
+                      if (_selectedOption == "A+") {
+                        pointsController[widget.index].text = 4.toString();
+                      } else if (_selectedOption == "A") {
+                        pointsController[widget.index].text = 3.7.toString();
+                      } else if (_selectedOption == "B+") {
+                        pointsController[widget.index].text = 3.5.toString();
+                      } else if (_selectedOption == "B") {
+                        pointsController[widget.index].text = 3.toString();
+                      } else if (_selectedOption == "B-") {
+                        pointsController[widget.index].text = 2.5.toString();
+                      } else if (_selectedOption == "C+") {
+                        pointsController[widget.index].text = 2.toString();
+                      } else if (_selectedOption == "C") {
+                        pointsController[widget.index].text = 1.5.toString();
+                      } else if (_selectedOption == "D") {
+                        pointsController[widget.index].text = 1.5.toString();
+                      } else if (_selectedOption == "F") {
+                        pointsController[widget.index].text = 0.toString();
+                      } else {
+                        pointsController[widget.index].text = "";
+                      }
+                      try {
+                        qualityPoints[widget.index] =
+                            double.parse(pointsController[widget.index].text) *
+                                double.parse(cHours[widget.index]);
+                      } catch (e) {
+                        qualityPoints[widget.index] = 0;
+                      }
+                      qPoint = qualityPoints[widget.index];
+                      cHours[widget.index];
                       grade[widget.index] = _selectedOption;
                     });
                   },
@@ -85,6 +121,49 @@ class InputWidgetState extends State<InputWidget> {
               SizedBox(width: 3),
               Expanded(
                 child: TextField(
+                  controller: pointsController[widget.index],
+                  onChanged: (value) {
+                    double points = 0;
+                    try {
+                      points = double.parse(value);
+                    } catch (e) {
+                      setState(() {
+                        grade[widget.index] = "Grade";
+                      });
+                      return;
+                    }
+                    setState(() {
+                      if (points >= 4) {
+                        grade[widget.index] = "A+";
+                      } else if (points >= 3.7) {
+                        grade[widget.index] = "A";
+                      } else if (points >= 3.4) {
+                        grade[widget.index] = "B+";
+                      } else if (points >= 3) {
+                        grade[widget.index] = "B";
+                      } else if (points >= 2.5) {
+                        grade[widget.index] = "B-";
+                      } else if (points >= 2) {
+                        grade[widget.index] = "C+";
+                      } else if (points >= 1.5) {
+                        grade[widget.index] = "C";
+                      } else if (points >= 1) {
+                        grade[widget.index] = "D";
+                      } else {
+                        grade[widget.index] = "F";
+                      }
+
+                      try {
+                        qualityPoints[widget.index] =
+                            double.parse(pointsController[widget.index].text) *
+                                double.parse(cHours[widget.index]);
+                      } catch (e) {
+                        qualityPoints[widget.index] = 0;
+                      }
+                      qPoint = qualityPoints[widget.index];
+                    });
+                  },
+                  keyboardType: TextInputType.number,
                   style: TextStyle(color: Colors.deepPurple, fontSize: 16),
                   decoration: InputDecoration(
                     labelText: "Points",
@@ -116,6 +195,18 @@ class InputWidgetState extends State<InputWidget> {
                     setState(() {
                       String _selectedOption = newValue!;
                       cHours[widget.index] = _selectedOption;
+
+                      try {
+                        qualityPoints[widget.index] =
+                            double.parse(pointsController[widget.index].text) *
+                                double.parse(cHours[widget.index]);
+                        creditHoursList[widget.index] =
+                            double.parse(_selectedOption);
+                      } catch (e) {
+                        creditHoursList[widget.index] = 0;
+                        qualityPoints[widget.index] = 0;
+                      }
+                      qPoint = qualityPoints[widget.index];
                     });
                   },
                   items: _cHoursList.map((String option) {
@@ -137,7 +228,7 @@ class InputWidgetState extends State<InputWidget> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              "Grade Points: 3.25",
+              "Grade Points: ${qPoint}",
               style: TextStyle(
                   color: Colors.deepPurple,
                   fontWeight: FontWeight.bold,
