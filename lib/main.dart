@@ -1,14 +1,36 @@
 import 'package:a_gpa_cal/InputWidget.dart';
-import 'package:a_gpa_cal/logics.dart';
 import 'package:flutter/material.dart';
 
+import 'logics.dart';
+
 void main(List<String> args) {
-  runApp(Home());
+  runApp(const Home());
 }
 
 List<String> grade = ["Grade"];
 List<String> cHours = ["C.hours"];
+List<String> subjects = [
+  "0",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10"
+];
 List<double> qualityPoints = [];
+TextEditingController currentCGPA = TextEditingController();
+TextEditingController totalCreditHours = TextEditingController();
+List<TextEditingController> pointsController = [
+  TextEditingController(text: "")
+];
+String sgpa = "0";
+String cgpa = "0";
+GPA gpa = GPA();
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -17,7 +39,7 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(primarySwatch: Colors.deepPurple),
-      home: HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }
@@ -30,70 +52,107 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String sgpa = "0";
-  List<bool> _showField = [false];
-  var _count = 1;
-  TextEditingController currentCGPA = TextEditingController();
-  TextEditingController totalCreditHours = TextEditingController();
+  var _count = 3;
+
   @override
   Widget build(BuildContext context) {
-    const duration = Duration(milliseconds: 300);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("GPA Cal"),
         actions: [
-          IconButton(
-              onPressed: () async {
-                if (_count >= 2) {
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextButton(
+                onPressed: () {
                   setState(() {
-                    _count--;
-                    _showField[_count - 1] = false;
+                    sgpa = gpa.calculateGPA();
+                    cgpa = gpa.calculateGPA();
+                    Future.delayed(Duration.zero, () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            actionsAlignment: MainAxisAlignment.center,
+                            actionsPadding: EdgeInsets.all(0),
+                            buttonPadding: EdgeInsets.all(0),
+                            iconPadding: EdgeInsets.all(0),
+                            content: Container(
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Colors.deepPurple, width: 2),
+                                  borderRadius: BorderRadius.circular(20)),
+                              height: MediaQuery.of(context).size.height * 0.1,
+                              child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text("SGPA: $sgpa",
+                                            style: TextStyle(
+                                                color: Colors.deepPurple,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold)),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text("CGPA: $cgpa",
+                                            style: TextStyle(
+                                                color: Colors.deepPurple,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold)),
+                                      ),
+                                    )
+                                  ]),
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                ),
+                                child: const Text(
+                                  'Close',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    });
                   });
-                  await Future.delayed(Duration(milliseconds: 300));
-                  setState(() {
-                    grade.removeAt(_count - 1);
-                    cHours.removeAt(_count - 1);
-                    qualityPoints.removeAt(_count - 1);
-                    creditHoursList.removeAt(_count - 1);
-                    pointsController[_count - 1].text = "";
-                  });
-                }
-              },
-              icon: Icon(
-                Icons.delete,
-                size: 25,
-              )),
-          IconButton(
-              onPressed: () {
-                setState(() {
-                  if (_count != 11) {
-                    _showField[_count - 1] = true;
-                    _showField.add(false);
-                    grade.add("Grade");
-                    cHours.add("C.hours");
-                    pointsController.add(TextEditingController(text: ""));
-                    creditHoursList.add(0);
-                    _count++;
-                    qualityPoints.add(0);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      showCloseIcon: true,
-                      closeIconColor: Colors.white,
-                      content: Text('Sorry, no more subjects will be added'),
-                    ));
-                  }
-                });
-              },
-              icon: Icon(
-                Icons.add,
-                size: 30,
-              )),
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white,
+                ),
+                child: Text(
+                  "Calculate",
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.deepPurple,
+                      fontWeight: FontWeight.bold),
+                )),
+          )
         ],
       ),
       body: Center(
         child: ListView(
           children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 15.0),
+              child: Center(
+                  child: Text(
+                "Enter CGPA & Total Credit Hours Below\n (1st Semester Students Can Ignore It)",
+                style: TextStyle(color: Colors.grey),
+              )),
+            ),
             Row(
               children: [
                 Expanded(
@@ -103,9 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: TextField(
                       keyboardType: TextInputType.number,
                       controller: currentCGPA,
-                      onChanged: (value) {},
                       decoration: InputDecoration(
-                          labelText: "Current CGPA",
+                          labelText: "CGPA",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20))),
                     ),
@@ -120,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: totalCreditHours,
                       onChanged: (value) {},
                       decoration: InputDecoration(
-                          labelText: "Total Credit Hours",
+                          labelText: "Credit Hours",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20))),
                     ),
@@ -130,54 +188,84 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ListView.builder(
               shrinkWrap: true,
-              physics: ClampingScrollPhysics(),
+              physics: const ClampingScrollPhysics(),
               itemCount: _count,
               itemBuilder: (context, index) {
-                return AnimatedSlide(
-                    duration: duration,
-                    offset: _showField[index] ? Offset(0, 0) : Offset(0, 2),
-                    child: AnimatedOpacity(
-                        duration: duration,
-                        opacity: _showField[index] ? 1 : 0,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 10.0, right: 10, bottom: 10),
-                          child: InputWidget(
-                            index: index,
-                          ),
-                        )));
+                grade.add("Grade");
+                cHours.add("C.hours");
+                pointsController.add(TextEditingController(text: ""));
+                creditHoursList.add(0);
+                qualityPoints.add(0);
+                return Padding(
+                  padding:
+                      const EdgeInsets.only(left: 10.0, right: 10, bottom: 10),
+                  child: InputWidget(
+                    index: index,
+                  ),
+                );
               },
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.deepPurple,
-        onPressed: () {
-          setState(() {
-            sgpa = calculateGPA();
-          });
-        },
-        label: Text("Calculate"),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndDocked,
       bottomNavigationBar: BottomAppBar(
           child: Container(
-        color: Colors.deepPurple,
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "SGPA: ${sgpa}",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
-            ),
-          ),
-        ]),
+        color: Color(0xFF673AB7),
         height: 50,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+                tooltip: "Delete Subject",
+                color: Colors.white,
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                disabledColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onPressed: () async {
+                  if (_count >= 1) {
+                    setState(() {
+                      _count--;
+                      grade.removeAt(_count);
+                      cHours.removeAt(_count);
+                      pointsController.removeAt(_count);
+                      creditHoursList.removeAt(_count);
+                      qualityPoints.removeAt(_count);
+                    });
+                  }
+                },
+                icon: const Icon(
+                  Icons.delete,
+                  size: 25,
+                )),
+            IconButton(
+                tooltip: "Add Subject",
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                disabledColor: Colors.transparent,
+                color: Colors.white,
+                highlightColor: Colors.transparent,
+                onPressed: () {
+                  setState(() {
+                    if (_count != 10) {
+                      _count++;
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        showCloseIcon: true,
+                        closeIconColor: Colors.white,
+                        content: Text('Sorry, no more subjects will be added'),
+                      ));
+                    }
+                  });
+                },
+                icon: const Icon(
+                  Icons.add,
+                  size: 30,
+                )),
+          ],
+        ),
       )),
     );
   }

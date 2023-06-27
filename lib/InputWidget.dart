@@ -6,19 +6,15 @@ import 'main.dart';
 class InputWidget extends StatefulWidget {
   const InputWidget({super.key, required this.index});
   final index;
-
   @override
   State<InputWidget> createState() => InputWidgetState();
 }
 
-List<TextEditingController> pointsController = [
-  TextEditingController(text: "")
-];
 List<double> creditHoursList = [];
 
 class InputWidgetState extends State<InputWidget> {
   Color myColor = Colors.grey;
-  List<String> _gradeList = [
+  final List<String> _gradeList = [
     'Grade',
     'A+',
     'A',
@@ -30,7 +26,7 @@ class InputWidgetState extends State<InputWidget> {
     "D",
     "F",
   ];
-  List<String> _cHoursList = [
+  final List<String> _cHoursList = [
     'C.hours',
     '1',
     '2',
@@ -39,20 +35,42 @@ class InputWidgetState extends State<InputWidget> {
     '5',
     '6',
   ];
-  double qPoint = 0;
+  String qPoint = "0.0";
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 10, right: 10, top: 10),
+      padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
       decoration: BoxDecoration(
-          border: Border.all(color: Colors.deepPurple, width: 3),
+          border: Border.all(
+            color: (grade[widget.index] != "Grade" &&
+                    cHours[widget.index] != "C.hours")
+                ? Colors.deepPurple
+                : Colors.grey,
+            width: (grade[widget.index] != "Grade" &&
+                    cHours[widget.index] != "C.hours")
+                ? 2
+                : 1,
+          ),
           borderRadius: BorderRadius.circular(20)),
       child: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              "Subject no: ${widget.index + 1}",
+              style: TextStyle(
+                  color: (grade[widget.index] != "Grade" &&
+                          cHours[widget.index] != "C.hours")
+                      ? Colors.deepPurple
+                      : Colors.grey,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+            ),
+          ),
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(4),
+                padding: const EdgeInsets.all(4),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                     border: Border.all(
@@ -76,7 +94,7 @@ class InputWidgetState extends State<InputWidget> {
                       } else if (_selectedOption == "A") {
                         pointsController[widget.index].text = 3.7.toString();
                       } else if (_selectedOption == "B+") {
-                        pointsController[widget.index].text = 3.5.toString();
+                        pointsController[widget.index].text = 3.4.toString();
                       } else if (_selectedOption == "B") {
                         pointsController[widget.index].text = 3.toString();
                       } else if (_selectedOption == "B-") {
@@ -99,7 +117,13 @@ class InputWidgetState extends State<InputWidget> {
                       } catch (e) {
                         qualityPoints[widget.index] = 0;
                       }
-                      qPoint = qualityPoints[widget.index];
+                      try {
+                        qPoint = qualityPoints[widget.index]
+                            .toString()
+                            .substring(0, 5);
+                      } catch (e) {
+                        qPoint = qualityPoints[widget.index].toString();
+                      }
                       cHours[widget.index];
                       grade[widget.index] = _selectedOption;
                     });
@@ -110,7 +134,9 @@ class InputWidgetState extends State<InputWidget> {
                       child: Text(
                         option,
                         style: TextStyle(
-                          color: Colors.deepPurple,
+                          color: ((grade[widget.index] != "Grade"))
+                              ? Colors.deepPurple
+                              : Colors.grey,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -118,7 +144,7 @@ class InputWidgetState extends State<InputWidget> {
                   }).toList(),
                 ),
               ),
-              SizedBox(width: 3),
+              const SizedBox(width: 3),
               Expanded(
                 child: TextField(
                   controller: pointsController[widget.index],
@@ -160,22 +186,38 @@ class InputWidgetState extends State<InputWidget> {
                       } catch (e) {
                         qualityPoints[widget.index] = 0;
                       }
-                      qPoint = qualityPoints[widget.index];
+                      try {
+                        qPoint = qualityPoints[widget.index]
+                            .toString()
+                            .substring(0, 5);
+                      } catch (e) {
+                        qPoint = qualityPoints[widget.index].toString();
+                      }
                     });
                   },
                   keyboardType: TextInputType.number,
-                  style: TextStyle(color: Colors.deepPurple, fontSize: 16),
+                  style: const TextStyle(
+                      color: Colors.deepPurple,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold),
                   decoration: InputDecoration(
-                    labelText: "Points",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                              width: (grade[widget.index] != "Grade") ? 2 : 1,
+                              color: (grade[widget.index] != "Grade")
+                                  ? Colors.deepPurple
+                                  : Colors.grey)),
+                      labelText: "Points",
+                      labelStyle: TextStyle(
+                          color: (grade[widget.index] != "Grade")
+                              ? Colors.deepPurple
+                              : Colors.grey)),
                 ),
               ),
-              SizedBox(width: 3),
+              const SizedBox(width: 3),
               Container(
-                padding: EdgeInsets.all(4),
+                padding: const EdgeInsets.all(4),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                     border: Border.all(
@@ -206,7 +248,13 @@ class InputWidgetState extends State<InputWidget> {
                         creditHoursList[widget.index] = 0;
                         qualityPoints[widget.index] = 0;
                       }
-                      qPoint = qualityPoints[widget.index];
+                      try {
+                        qPoint = qualityPoints[widget.index]
+                            .toString()
+                            .substring(0, 5);
+                      } catch (e) {
+                        qPoint = qualityPoints[widget.index].toString();
+                      }
                     });
                   },
                   items: _cHoursList.map((String option) {
@@ -215,7 +263,9 @@ class InputWidgetState extends State<InputWidget> {
                       child: Text(
                         option,
                         style: TextStyle(
-                          color: Colors.deepPurple,
+                          color: (cHours[widget.index] != "C.hours")
+                              ? Colors.deepPurple
+                              : Colors.grey,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -228,9 +278,9 @@ class InputWidgetState extends State<InputWidget> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              "Grade Points: ${qPoint}",
+              "Grade Points: $qPoint",
               style: TextStyle(
-                  color: Colors.deepPurple,
+                  color: (qPoint != "0.0") ? Colors.deepPurple : Colors.grey,
                   fontWeight: FontWeight.bold,
                   fontSize: 16),
             ),
